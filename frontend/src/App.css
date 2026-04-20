@@ -392,6 +392,80 @@ body {
 
 .doc-card__time { margin-left: auto; }
 
+/* Delete controls */
+.doc-card__actions {
+  display:     flex;
+  align-items: center;
+  gap:         0.35rem;
+  margin-top:  0.4rem;
+  min-height:  24px;
+}
+
+.doc-card__confirm-label {
+  font-size:  0.72rem;
+  color:      var(--color-error);
+  font-weight: 600;
+  margin-right: 0.1rem;
+}
+
+.doc-card__delete-error {
+  font-size: 0.7rem;
+  color:     var(--color-error);
+  flex:      1;
+}
+
+/* Small icon-only buttons used for delete / confirm / cancel */
+.btn-icon {
+  display:       inline-flex;
+  align-items:   center;
+  justify-content: center;
+  width:         22px;
+  height:        22px;
+  border-radius: var(--radius-sm);
+  border:        none;
+  cursor:        pointer;
+  font-size:     0.75rem;
+  line-height:   1;
+  transition:    background var(--transition), opacity var(--transition);
+  flex-shrink:   0;
+}
+.btn-icon:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-icon--delete {
+  background: transparent;
+  color:      var(--color-text-faint);
+  margin-left: auto;   /* push to the right edge */
+}
+.btn-icon--delete:hover {
+  background: var(--color-error-dim);
+  color:      var(--color-error);
+}
+
+.btn-icon--confirm {
+  background: var(--color-error-dim);
+  color:      var(--color-error);
+}
+.btn-icon--confirm:not(:disabled):hover {
+  background: var(--color-error);
+  color:      #fff;
+}
+
+.btn-icon--cancel {
+  background: transparent;
+  color:      var(--color-text-muted);
+  border:     1px solid var(--color-border);
+}
+.btn-icon--cancel:not(:disabled):hover {
+  border-color: var(--color-border-hover);
+  color:        var(--color-text);
+}
+
+/* Card highlight when in confirm state */
+.doc-card--confirming {
+  border-color: var(--color-error);
+  background:   var(--color-error-dim);
+}
+
 /* ── QueryBox ── */
 .query-box { display: flex; flex-direction: column; gap: 0.75rem; }
 

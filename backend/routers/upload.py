@@ -2,8 +2,9 @@
 routers/upload.py — FastAPI router for file upload and ingestion.
 
 Endpoints:
-  POST /upload  — Accept a file (PDF, DOCX, CSV, TXT), run the full ingestion
-                  pipeline, and return the document id and chunk count.
+  POST   /upload/              — Accept a file, run ingestion, return document id + chunk count.
+  GET    /upload/documents/    — List all ingested documents with chunk counts.
+  DELETE /upload/documents/{id} — Delete a document and all its chunks + embeddings.
 
 The file is saved to a temporary location, processed, then deleted.
 All ingestion errors are caught and returned as HTTP 422 or 500 responses.
@@ -209,3 +210,49 @@ def list_documents(db: Session = Depends(get_db)):
         }
         for row in rows
     ]
+
+
+# ---------------------------------------------------------------------------
+# DELETE /upload/documents/{document_id}
+# ---------------------------------------------------------------------------
+
+@router.delete("/documents/{document_id}")
+def delete_document(document_id: int, db: Session = Depends(get_db)):
+    """
+    Delete a document and all its associated data (chunks + embeddings).
+
+    The Document ORM model has cascade="all, delete-orphan" on its chunks
+    relationship, and Chunk has the same on its embedding relationship, so
+    deleting the Document row automatically deletes all child rows in a
+    single transaction — no manual cleanup needed.
+
+    Returns:
+      {"status": "deleted", "document_id": int, "name": str}
+
+    Raises:
+      404 if the document does not exist.
+      500 if the database delete fails.
+    """
+    # Fetch the document first so we can return its name and give a clear 404
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Document {document_id} not found",
+        )
+
+    doc_name = doc.name
+    print(f"[upload] Deleting document id={document_id} name='{doc_name}'")
+
+    try:
+        db.delete(doc)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to delete document: {e}",
+        )
+
+    print(f"[upload] Deleted document id={document_id} and all its chunks/embeddings")
+    return {"status": "deleted", "document_id": document_id, "name": doc_name}

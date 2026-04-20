@@ -98,6 +98,25 @@ export async function fetchDocuments() {
 }
 
 // ---------------------------------------------------------------------------
+// deleteDocument — DELETE /upload/documents/{id}
+// ---------------------------------------------------------------------------
+
+/**
+ * Delete an ingested document and all its chunks + embeddings.
+ *
+ * @param {number} documentId — The document id to delete
+ * @returns {Promise<{status, document_id, name}>}
+ */
+export async function deleteDocument(documentId) {
+  try {
+    const response = await api.delete(`/upload/documents/${documentId}`);
+    return response.data;
+  } catch (err) {
+    throw normalizeError(err);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // queryDocuments — POST /query/
 // ---------------------------------------------------------------------------
 
